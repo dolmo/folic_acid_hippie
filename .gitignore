@@ -1,0 +1,75 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+venv/
+ENV/
+env/
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Data files
+*.csv
+*.xlsx
+*.xls
+*.json
+*.parquet
+
+# Large files
+*.zip
+*.tar
+*.tar.gz
+*.rar
+/FolicAcid_T3
+/FolicAcid_T4_02252025_SA-selected
+/embedding_results
+/per_well_processed
+/new_data_extract
+/new_data_extract/FolicAcid_T4_02252025_SA-selected
+/new_data_extract/FolicAcid_T3
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+
+# Secrets / credentials
+secrets.sh
+*.env
