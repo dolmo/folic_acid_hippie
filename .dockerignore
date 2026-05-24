@@ -43,7 +43,6 @@ env/
 *.xls
 *.json
 *.parquet
-data/*
 
 # Large files
 *.zip
@@ -74,3 +73,6 @@ Thumbs.db
 # Secrets / credentials
 secrets.sh
 *.env
+data/
+*.zip
+results/

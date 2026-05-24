@@ -1,0 +1,84 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: priyanka-hippie-fa-t3
+  namespace: braingeneers
+spec:
+  backoffLimit: 0
+  completions: 1
+  template:
+    metadata:
+      labels:
+        k8s-app: priyanka-hippie-fa-t3
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: hippie-training
+        image: pytorch/pytorch:2.3.1-cuda11.8-cudnn8-runtime
+        command: ["/bin/bash", "-c"]
+        env:
+        - name: PYTHONUNBUFFERED
+          value: "1"
+        - name: AWS_ACCESS_KEY_ID
+          value: "APM8994ERC0MI6B4LF5D"
+        - name: AWS_SECRET_ACCESS_KEY
+          value: "NNx80u7xpz9kKYF243GVR40TlvC7viRD0Gl7VPJZ"
+        - name: ENDPOINT
+          value: "https://s3-west.nrp-nautilus.io"
+        args:
+          - |
+            export DEBIAN_FRONTEND=noninteractive &&
+            apt-get update && apt-get install -y -q git awscli &&
+            pip install git+https://github.com/braingeneers/HIPPIE.git &&
+            git clone https://github.com/braingeneers/HIPPIE.git /tmp/hippie_repo &&
+            export PYTHONPATH=/tmp/hippie_repo:$PYTHONPATH &&
+            aws s3 cp s3://braingeneersdev/prmanoj/folic_acid_t3/ /tmp/hippie_repo/datasets_hippie/FA_T3/ --recursive --endpoint-url https://s3-west.nrp-nautilus.io &&
+            cd /tmp/hippie_repo &&
+            sed -i 's/"lissberger_labeled_cell_type": 3,#/"lissberger_labeled_cell_type": 3,\n        "FA_T3": 4,/' cross_dataset_script.py &&
+            sed -i 's/from multimodal_model import/from hippie.multimodal_model import/' cross_dataset_script.py &&
+            sed -i 's/from dataloading import/from hippie.dataloading import/' cross_dataset_script.py &&
+            sed -i 's/from utils import/from hippie.utils import/' cross_dataset_script.py &&
+            sed -i 's/from augmentations import/from hippie.augmentations import/' cross_dataset_script.py &&
+            sed -i 's/joint_model.load_state_dict(torch.load(joint_path)\["state_dict"\])/pass/' cross_dataset_script.py &&
+            python cross_dataset_script.py --training-dataset hausser_cell_type --predict-dataset FA_T3 --config full_architecture --pretrain-max-epochs 10 --finetune-max-epochs 0 --z_dim 32 --beta 4 --batch-size 512 --learning-rate 0.001 --weight-decay 0.01 --acg-weight 1.0 --output-dir /tmp/results --data-dir /tmp/hippie_repo/datasets_hippie --no-wandb &&
+            aws s3 cp /tmp/results/ s3://braingeneersdev/prmanoj/folic_acid_t3_results/ --recursive --endpoint-url https://s3-west.nrp-nautilus.io
+        resources:
+          limits:
+            memory: "32Gi"
+            cpu: "8"
+            nvidia.com/gpu: "1"
+            ephemeral-storage: "50Gi"
+          requests:
+            memory: "16Gi"
+            cpu: "4"
+            nvidia.com/gpu: "1"
+            ephemeral-storage: "30Gi"
+        volumeMounts:
+        - name: ephemeral
+          mountPath: "/data"
+        - name: dshm
+          mountPath: "/dev/shm"
+      volumes:
+      - name: ephemeral
+        emptyDir: {}
+      - name: dshm
+        emptyDir:
+          medium: Memory
+      tolerations:
+        - key: "nautilus.io/chase-ci"
+          operator: "Equal"
+          value: "true"
+          effect: "NoSchedule"
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: kubernetes.io/hostname
+                operator: NotIn
+                values:
+                  - k8s-chase-ci-04.calit2.optiputer.net
+                  - k8s-chase-ci-01.noc.ucsb.edu
+                  - k8s-chase-ci-02.calit2.optiputer.net
+                  - fiona8-1.calit2.uci.edu
+                  - k8s-chase-ci-06.calit2.optiputer.net

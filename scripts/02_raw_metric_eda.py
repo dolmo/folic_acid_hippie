@@ -28,9 +28,11 @@ from scipy import stats
 # ─── Paths (from config.py) ──────────────────────────────────────────────────
 import sys
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from config import METADATA_CSV, RESULTS_EDA
+#from config import METADATA_CSV, RESULTS_EDA
+from config import METADATA_CSV_T3, RESULTS_EDA
 
-META_PATH = METADATA_CSV
+META_PATH = METADATA_CSV_T3
+#META_PATH = METADATA_CSV
 OUT_DIR   = RESULTS_EDA
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 
