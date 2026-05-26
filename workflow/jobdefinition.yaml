@@ -1,0 +1,63 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: ${JOB_PREFIX}-${NAME}
+spec:
+  backoffLimit: 0
+  completions: 1
+  template:
+    metadata:
+      labels:
+        k8s-app: ${JOB_PREFIX}-${NAME}
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: ${CONTAINER_NAME}
+        image: ${DOCKER_IMAGE}
+        command: ["stdbuf", "-i0", "-o0", "-e0", "bash", "-c"]
+        env:
+        - name: PYTHONUNBUFFERED
+          value: "1"
+        - name: AWS_ACCESS_KEY_ID
+          value: "${AWS_ACCESS_KEY_ID}"
+        - name: AWS_SECRET_ACCESS_KEY
+          value: "${AWS_SECRET_ACCESS_KEY}"
+        - name: ENDPOINT
+          value: "${S3_ENDPOINT}"
+        - name: PROJECT_ROOT
+          value: "${PROJECT_ROOT}"
+        - name: OUTPUT_DIR
+          value: "${OUTPUT_DIR}"
+        - name: INPUT_S3_PATH
+          value: "${INPUT_S3_PATH}"
+        - name: S3_ENDPOINT_URL_RESULTS
+          value: "${S3_ENDPOINT_URL_RESULTS}"
+        args:
+          - "${RUN_COMMAND}"
+        resources:
+          limits:
+            memory: ${MEMORY_LIMIT}
+            cpu: "${CPU_LIMIT}"
+            ephemeral-storage: ${STORAGE_LIMIT}
+            nvidia.com/gpu: "${GPU_LIMIT}"
+          requests:
+            memory: ${MEMORY_REQUEST}
+            cpu: "${CPU_REQUEST}"
+            ephemeral-storage: ${STORAGE_REQUEST}
+            nvidia.com/gpu: "${GPU_LIMIT}"
+        volumeMounts:
+        - name: ephemeral
+          mountPath: "/data"
+        - name: "dshm"
+          mountPath: "/dev/shm"
+      volumes:
+      - name: ephemeral
+        emptyDir: {}
+      - name: dshm
+        emptyDir:
+          medium: Memory
+      tolerations:
+        - key: "nautilus.io/chase-ci"
+          operator: "Equal"
+          value: "true"
+          effect: "NoSchedule"
