@@ -19,14 +19,8 @@
 # =============================================================================
 
 # Paths — override via environment variables if running on a different machine
-# 1. Point it to your conda environment's python executable
-VENV_PY="/home/dolmomar/miniconda3/envs/folic_acid_env/bin/python" 
-
-# 2. Point it to the HIPPIE repo you just cloned
-HIPPIE_DIR="/home/dolmomar/mostajo/HIPPIE"
-
-# 3. Point it to your T3 preprocessed data
-DATA_DIR="/home/dolmomar/mostajo/folic_acid_hippie/data/output_t3"
+VENV_PY=${HIPPIE_VENV_PYTHON:-/home/jesus/hippie_rebuttals/hip-hip-hippie/hippie_venv/bin/python}
+HIPPIE_DIR=${HIPPIE_CODE_DIR:-/home/jesus/hippie_rebuttals/hip-hip-hippie}
 
 run_one() {
     local EP=$1
@@ -34,7 +28,7 @@ run_one() {
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo "  HIPPIE training: FA_T4  |  config=full_model  |  epochs=${EP}"
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    cd "$HIPPIE_DIR"
+    cd "$HIPPIE_DIR"        
     $VENV_PY train_FA_analysis.py \
         --dataset FA_T4 \
         --config full_model \
