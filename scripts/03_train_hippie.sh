@@ -12,7 +12,7 @@
 # Key choices:
 #   --config full_model       : full cVAE (regularisation + augmentation + conditional encoder)
 #   --finetune-without-labels False : pretrain-only, NO finetuning step (embeds ALL FA_T4 units)
-#   --pretrain-max-epochs N   : sweep 1 / 10 / 20 to observe embedding collapse
+#   --pretrain-max-epochs N   : sweep 1 / 10 / 20 to observe embedding collapsea
 #   --z_dim 32                : latent dimension (matches paper default)
 #   --beta 4                  : KL weight
 #   --dataset FA_T4           : dataset to embed (excluded from pretraining)

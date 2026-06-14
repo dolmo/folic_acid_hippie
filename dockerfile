@@ -8,7 +8,7 @@ WORKDIR /src
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
 
 # Install HIPPIE as a pip dependency
-RUN pip install git+https://github.com/braingeneers/HIPPIE.git
+RUN pip install git+https://github.com/priyankamanoj50/phippie
 
 # Install folic acid analysis dependencies
 RUN pip install \

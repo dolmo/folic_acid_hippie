@@ -37,7 +37,7 @@ from scipy import stats
 # ─── Paths (from config.py) ──────────────────────────────────────────────────
 import sys
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from config import DATA_RAW, METADATA_CSV, RESULTS_NETWORK
+from config import DATA_RAW_T3 as DATA_RAW, METADATA_CSV_T3 as METADATA_CSV, RESULTS_NETWORK
 
 DATA_ROOT = DATA_RAW
 META_PATH = METADATA_CSV

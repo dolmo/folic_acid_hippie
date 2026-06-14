@@ -55,7 +55,7 @@ args = parser.parse_args()
 
 import sys
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from config import METADATA_CSV, embedding_dir, results_embedding_dir
+from config import METADATA_CSV_T3 as METADATA_CSV, embedding_dir, results_embedding_dir
 
 EMB_DIR      = embedding_dir(args.config, args.z_dim, args.beta, args.run_suffix)
 META_PATH    = METADATA_CSV
@@ -67,22 +67,34 @@ OUT_DIR.mkdir(parents=True, exist_ok=True)
 print(f"Loading metadata from {META_PATH}")
 meta = pd.read_csv(META_PATH)
 
-# Epoch-specific parsed CSV (preferred) → generic → raw
-parsed_ep   = EMB_DIR / f"embeddings_parsed_ep{args.epochs}.csv"
-parsed_path = EMB_DIR / "embeddings_parsed.csv"    # legacy / 10-epoch
-raw_path    = EMB_DIR / "pretraining_multi_embeddings.csv"
+# Epoch-specific parsed CSV (preferred) → generic → predict (T3 HIPPIE output) → raw
+parsed_ep    = EMB_DIR / f"embeddings_parsed_ep{args.epochs}.csv"
+parsed_path  = EMB_DIR / "embeddings_parsed.csv"
+predict_path = EMB_DIR / "predict_embeddings.csv"   # NEW: HIPPIE cross_dataset_script.py output (T3 workflow)
+raw_path     = EMB_DIR / "pretraining_multi_embeddings.csv"
 
 if parsed_ep.exists():
     emb_path = parsed_ep
 elif parsed_path.exists():
     emb_path = parsed_path
+elif predict_path.exists():                          # NEW
+    emb_path = predict_path                          # NEW
 else:
     emb_path = None
 
 if emb_path is not None:
     print(f"Loading pre-parsed embeddings from {emb_path}")
     emb_df   = pd.read_csv(emb_path)
-    latent_cols = [c for c in emb_df.columns if c.startswith("z")]
+    # latent_cols = [c for c in emb_df.columns if c.startswith("z")]   # old: z-prefix only
+    # NEW: try z*, then latent_*, then pure-numeric column names
+    latent_cols = [c for c in emb_df.columns if c.startswith(("z", "latent_"))]
+    if not latent_cols:
+        latent_cols = [c for c in emb_df.columns if str(c).isdigit()]
+    if not latent_cols:
+        raise RuntimeError(
+            f"No latent columns found in {emb_path}. Columns: {list(emb_df.columns)}"
+        )
+    print(f"Using {len(latent_cols)} latent columns: {latent_cols[0]}..{latent_cols[-1]}")
     Z = emb_df[latent_cols].values
 else:
     print(f"Parsing raw embeddings from {raw_path}")

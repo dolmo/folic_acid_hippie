@@ -35,9 +35,9 @@ from itertools import combinations
 # ─── Config (from config.py) ──────────────────────────────────────────────────
 import sys
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from config import METADATA_CSV, results_hdbscan_dir
+from config import METADATA_CSV_T3 as METADATA_CSV, results_hdbscan_dir
 
-HDBSCAN_DIR = results_hdbscan_dir(100)
+HDBSCAN_DIR = results_hdbscan_dir(10)
 META_PATH   = METADATA_CSV
 OUT_DIR     = HDBSCAN_DIR / "ei_proportion"
 OUT_DIR.mkdir(parents=True, exist_ok=True)

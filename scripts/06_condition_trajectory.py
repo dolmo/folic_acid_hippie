@@ -8,8 +8,8 @@ Design:
   - Conditions A/B/D/E share the same 4 mice (M07137/M07708/M07865/M08092)
     recorded at DIV 3, 6, 9, 13, 16, 20, 23 → clean longitudinal comparison
   - Condition C (10 mg, DIV 5/8 only, different mice) treated separately
-  - "Early" = DIV 3-6  (low FA exposure time)
-  - "Late"  = DIV 20-23 (maximal FA exposure time)
+  - "Early" = DIV 6-8  (low FA exposure time)
+  - "Late"  = DIV 24-28 (maximal FA exposure time)
 
 Outputs saved to:
   /mnt/d/datasets_hippie/Roy_shruti_folic_data/condition_EDA/
@@ -35,7 +35,7 @@ warnings.filterwarnings("ignore")
 # ── Paths (from config.py) ────────────────────────────────────────────────────
 import sys
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from config import METADATA_CSV, RESULTS_NETWORK, RESULTS_COND
+from config import METADATA_CSV_T3 as METADATA_CSV, RESULTS_NETWORK, RESULTS_COND
 
 META_PATH = METADATA_CSV
 NET_PATH  = RESULTS_NETWORK / "network_metrics_all_wells.csv"
@@ -43,24 +43,24 @@ OUT_DIR   = RESULTS_COND
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 
 # ── Condition display settings ────────────────────────────────────────────────
-COND_ORDER  = ["0mg_deficient", "2mg_control", "20mg_super_excess", "folinic_acid_excess"]
+COND_ORDER  = ["0mg_deficient", "2mg_control", "10mg_excess", "20mg_super_excess"]
 COND_LABELS = {
     "0mg_deficient":      "0 mg FA (deficient)",
     "2mg_control":        "2 mg FA (control)",
+    "10mg_excess":        "10 mg FA (excess)",
     "20mg_super_excess":  "20 mg FA (super-excess)",
-    "folinic_acid_excess":"Folinic Acid (excess)",
-    "10mg_excess":        "10 mg FA (excess)*",
 }
+
 COND_COLORS = {
     "0mg_deficient":      "#d62728",   # red
     "2mg_control":        "#2ca02c",   # green (control)
-    "20mg_super_excess":  "#ff7f0e",   # orange
-    "folinic_acid_excess":"#9467bd",   # purple
-    "10mg_excess":        "#8c564b",   # brown (confounded)
+    "10mg_excess":        "#ff7f0e",   # orange
+    "20mg_super_excess":  "#9467bd",   # purple
 }
-MAIN_DIVS = [3, 6, 9, 13, 16, 20, 23]    # main cohort
-EARLY_DIV = [3, 6]
-LATE_DIV  = [20, 23]
+
+MAIN_DIVS = [6, 8, 13, 15, 16, 17, 21, 24, 28, 31, 36]
+EARLY_DIV = [6, 8]
+LATE_DIV  = [24, 28]
 
 # Waveform / electrophysiology metrics to analyse
 UNIT_METRICS = [
@@ -185,9 +185,9 @@ for ax, (metric, ylabel, log_scale) in zip(axes, UNIT_METRICS):
 
     # Shade "early" / "late" bands
     ax.axvspan(EARLY_DIV[0] - 0.5, EARLY_DIV[-1] + 0.5, color="steelblue", alpha=0.07,
-               label="_early" if ax != axes[0] else "Early (DIV 3-6)")
+               label="_early" if ax != axes[0] else "Early (DIV 6-8)")
     ax.axvspan(LATE_DIV[0] - 0.5, LATE_DIV[-1] + 0.5, color="tomato", alpha=0.07,
-               label="_late" if ax != axes[0] else "Late (DIV 20-23)")
+               label="_late" if ax != axes[0] else "Late (DIV 24-28)")
 
     ax.set_xticks(MAIN_DIVS)
     ax.set_xlabel("DIV")
@@ -251,21 +251,22 @@ for ax, (metric, ylabel) in zip(axes, NET_METRICS):
     ax.legend(loc="upper left", fontsize=8, ncol=2)
 
 # Add condition C (10mg) as dashed reference lines at DIV 5/8
-net_c = net[net["condition"] == "10mg_excess"]
-for ax, (metric, _) in zip(axes, NET_METRICS):
-    if metric not in net.columns or net_c.empty:
-        continue
-    for div_val in [5, 8]:
-        sub_c = net_c[net_c["div"] == div_val][metric].dropna()
-        if len(sub_c):
-            ax.axhline(sub_c.mean(), color=COND_COLORS["10mg_excess"],
-                       lw=1.5, ls="--", alpha=0.7,
-                       label=f"10mg DIV{div_val} (confounded)" if metric == NET_METRICS[0][0] else "")
+#net_c = net[net["condition"] == "10mg_excess"]
+#for ax, (metric, _) in zip(axes, NET_METRICS):
+ #   if metric not in net.columns or net_c.empty:
+  #      continue
+   # for div_val in [5, 8]:
+    #    sub_c = net_c[net_c["div"] == div_val][metric].dropna()
+     #   if len(sub_c):
+      #      ax.axhline(sub_c.mean(), color=COND_COLORS["10mg_excess"],
+       #                lw=1.5, ls="--", alpha=0.7,
+        #               label=f"10mg DIV{div_val} (confounded)" if metric == NET_METRICS[0][0] else "")
 
 plt.suptitle("Network metric trajectories over DIV by FA condition\n"
-             "Blue band = early (DIV 3-6), Red band = late (DIV 20-23)\n"
+             "Blue band = early (DIV 6-8), Red band = late (DIV 24-28)\n"
              "Dashed brown lines = 10 mg FA at DIV 5/8 (different mice, confounded)",
              fontsize=11, y=1.005)
+
 plt.tight_layout()
 fig.savefig(OUT_DIR / "fig2_network_trajectories.png", dpi=150, bbox_inches="tight")
 plt.close()
@@ -278,8 +279,8 @@ print("  Saved fig2_network_trajectories.png")
 # ══════════════════════════════════════════════════════════════════════════════
 print("Figure 3: Before vs after violin plots (unit-level) …")
 well_unit["epoch"] = well_unit["div"].apply(
-    lambda d: "Early\n(DIV 3-6)" if d in EARLY_DIV else
-              ("Late\n(DIV 20-23)" if d in LATE_DIV else None)
+    lambda d: "Early\n(DIV 6-8)" if d in EARLY_DIV else
+              ("Late\n(DIV 24-28)" if d in LATE_DIV else None)
 )
 bva = well_unit[well_unit["epoch"].notna()].copy()
 
@@ -301,7 +302,7 @@ for ax, (metric, ylabel, log_scale) in zip(axes, UNIT_METRICS):
     for cond in COND_ORDER:
         group_center = pos + 0.5
         group_centers[cond] = group_center
-        for epoch in ["Early\n(DIV 3-6)", "Late\n(DIV 20-23)"]:
+        for epoch in ["Early\n(DIV 6-8)", "Late\n(DIV 24-28)"]:
             vals = bva[(bva["condition"] == cond) & (bva["epoch"] == epoch)][metric].dropna().values
             if len(vals) == 0:
                 pos += 1
@@ -343,15 +344,15 @@ for ax, (metric, ylabel, log_scale) in zip(axes, UNIT_METRICS):
 # Legend for epoch fill
 legend_els = [
     Line2D([0], [0], marker="o", color="w", markerfacecolor="grey",
-           alpha=0.5, markersize=10, label="Early (DIV 3-6)"),
+           alpha=0.5, markersize=10, label="Early (DIV 6-8)"),
     Line2D([0], [0], marker="o", color="w", markerfacecolor="grey",
-           alpha=0.9, markersize=10, label="Late (DIV 20-23)"),
+           alpha=0.9, markersize=10, label="Late (DIV 24-28)"),
 ]
 for ax in axes[len(UNIT_METRICS):]:
     ax.set_visible(False)
 
 plt.suptitle("Before vs After FA exposure — Unit-level metrics\n"
-             "E = Early (DIV 3-6), L = Late (DIV 20-23)  |  Violin fill = condition colour",
+             "E = Early (DIV 6-8), L = Late (DIV 24-28)  |  Violin fill = condition colour",
              fontsize=12)
 plt.tight_layout(rect=[0, 0.04, 1, 0.97])
 fig.legend(handles=legend_els, loc="lower center", ncol=2, fontsize=10,
@@ -366,8 +367,8 @@ print("  Saved fig3_before_after_unit_violin.png")
 # ══════════════════════════════════════════════════════════════════════════════
 print("Figure 4: Before vs after violin plots (network metrics) …")
 net["epoch"] = net["div"].apply(
-    lambda d: "Early\n(DIV 3-6)" if d in EARLY_DIV else
-              ("Late\n(DIV 20-23)" if d in LATE_DIV else None)
+    lambda d: "Early\n(DIV 6-8)" if d in EARLY_DIV else
+              ("Late\n(DIV 24-28)" if d in LATE_DIV else None)
 )
 net_bva = net[net["epoch"].notna()].copy()
 
@@ -384,7 +385,7 @@ for ax, (metric, ylabel) in zip(axes, NET_METRICS):
     pos = 0
     for cond in COND_ORDER:
         group_centers[cond] = pos + 0.5
-        for epoch in ["Early\n(DIV 3-6)", "Late\n(DIV 20-23)"]:
+        for epoch in ["Early\n(DIV 6-8)", "Late\n(DIV 24-28)"]:
             vals = net_bva[(net_bva["condition"] == cond) & (net_bva["epoch"] == epoch)][metric].dropna().values
             col   = COND_COLORS[cond]
             alpha = 0.45 if epoch.startswith("E") else 0.90
@@ -415,7 +416,7 @@ for ax in axes[len(NET_METRICS):]:
 
 fig.legend(handles=legend_els, loc="lower right", fontsize=10)
 plt.suptitle("Before vs After FA exposure — Network-level metrics\n"
-             "E = Early (DIV 3-6), L = Late (DIV 20-23)", fontsize=12, y=1.005)
+             "E = Early (DIV 6-8), L = Late (DIV 24-28)", fontsize=12, y=1.005)
 plt.tight_layout()
 fig.savefig(OUT_DIR / "fig4_before_after_network_violin.png", dpi=150, bbox_inches="tight")
 plt.close()
@@ -424,7 +425,7 @@ print("  Saved fig4_before_after_network_violin.png")
 
 # ══════════════════════════════════════════════════════════════════════════════
 # FIGURE 5: Delta (late − early) per condition — within-mouse effect size
-# Shows how much each condition changes from DIV 3-6 to DIV 20-23
+# Shows how much each condition changes from DIV 6-8 to DIV 24-28
 # ══════════════════════════════════════════════════════════════════════════════
 print("Figure 5: Delta (late − early) per condition …")
 ALL_METRICS = [(m, lbl, ls) for m, lbl, ls in UNIT_METRICS if m in well_unit.columns]
@@ -499,7 +500,7 @@ for ax, mlabel in zip(axes, all_metric_labels):
 for ax in axes[n_m:]:
     ax.set_visible(False)
 
-plt.suptitle("Δ (late DIV 20-23 − early DIV 3-6) per condition\n"
+plt.suptitle("Δ (late DIV 24-28 − early DIV 6-8) per condition\n"
              "Bars = mean ± SEM across mice; KW = Kruskal-Wallis across conditions",
              fontsize=12, y=1.01)
 plt.tight_layout()

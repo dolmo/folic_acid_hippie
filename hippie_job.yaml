@@ -42,14 +42,14 @@ spec:
             sed -i 's/from utils import/from hippie.utils import/' cross_dataset_script.py &&
             sed -i 's/from augmentations import/from hippie.augmentations import/' cross_dataset_script.py &&
             sed -i 's/joint_model.load_state_dict(torch.load(joint_path)\["state_dict"\])/pass/' cross_dataset_script.py &&
-            python cross_dataset_script.py --training-dataset hausser_cell_type --predict-dataset FA_T3 --config full_architecture --pretrain-max-epochs 10 --finetune-max-epochs 1 --z_dim 32 --beta 4 --batch-size 512 --learning-rate 0.001 --weight-decay 0.01 --acg-weight 1.0 --output-dir /tmp/results --data-dir /tmp/hippie_repo/datasets_hippie &&
+            python cross_dataset_script.py --training-dataset hausser_cell_type --predict-dataset FA_T3 --config full_architecture --pretrain-max-epochs 10 --finetune-max-epochs 5 --z_dim 32 --beta 4 --batch-size 512 --learning-rate 0.001 --weight-decay 0.01 --acg-weight 1.0 --output-dir /tmp/results --data-dir /tmp/hippie_repo/datasets_hippie &&
             aws s3 cp /tmp/results/ s3://braingeneersdev/prmanoj/folic_acid_t3_results/ --recursive --endpoint-url https://s3-west.nrp-nautilus.io
         resources:
           limits:
-            memory: "32Gi"
-            cpu: "8"
+            memory: "19Gi"
+            cpu: "4"
             nvidia.com/gpu: "1"
-            ephemeral-storage: "50Gi"
+            ephemeral-storage: "36Gi"
           requests:
             memory: "16Gi"
             cpu: "4"

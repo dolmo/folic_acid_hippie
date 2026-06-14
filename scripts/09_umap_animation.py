@@ -42,7 +42,7 @@ args = parser.parse_args()
 # ─── Paths (from config.py) ────────────────────────────────────────────────────
 import sys
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from config import METADATA_CSV, results_hdbscan_dir
+from config import METADATA_CSV_T3 as METADATA_CSV, results_hdbscan_dir
 
 HDBSCAN_DIR = results_hdbscan_dir(100)
 META_PATH  = METADATA_CSV
@@ -51,8 +51,9 @@ OUT_DIR.mkdir(parents=True, exist_ok=True)
 
 # ─── Constants ────────────────────────────────────────────────────────────────
 DATE_TO_DIV = {
-    250228: 3, 250303: 6, 250306: 9, 250310: 13,
-    250313: 16, 250317: 20, 250320: 23,
+    241028: 6, 241030: 8, 241104: 13, 241106: 8, 241107: 16,
+    241112: 21, 241113: 15, 241115: 24, 241119: 28, 241122: 31,
+    241126: 28, 241127: 36,
 }
 
 CONDITIONS = [

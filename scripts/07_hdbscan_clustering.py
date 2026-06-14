@@ -35,15 +35,22 @@ parser.add_argument("--min-cluster-size", type=int,   default=200)
 parser.add_argument("--min-samples",      type=int,   default=50)
 parser.add_argument("--umap-n-neighbors", type=int,   default=30)
 parser.add_argument("--umap-min-dist",    type=float, default=0.1)
+parser.add_argument("--config",           type=str,   default="full_architecture")
+parser.add_argument("--z-dim",            type=int,   default=32)
+parser.add_argument("--beta",             type=float, default=4.0)
 args = parser.parse_args()
 
 import sys
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from config import (embedding_dir, embedding_file, METADATA_CSV,
-                    WAVEFORMS_CSV, ACG_CSV, ISI_CSV, results_hdbscan_dir)
+from config import (embedding_dir, embedding_file,
+                    METADATA_CSV_T3 as METADATA_CSV,
+                    WAVEFORMS_CSV_T3 as WAVEFORMS_CSV,
+                    ACG_CSV_T3 as ACG_CSV,
+                    ISI_CSV_T3 as ISI_CSV,
+                    results_hdbscan_dir)
 
-EMB_BASE  = embedding_dir()
-EMB_PATH  = embedding_file(args.epochs)
+EMB_BASE  = embedding_dir(args.config, args.z_dim, args.beta)
+EMB_PATH  = embedding_file(args.epochs, args.config, args.z_dim, args.beta)
 META_PATH = METADATA_CSV
 WAVE_PATH = WAVEFORMS_CSV
 ACG_PATH  = ACG_CSV
