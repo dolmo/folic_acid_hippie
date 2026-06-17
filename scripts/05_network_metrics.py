@@ -204,9 +204,9 @@ for date_dir in dates:
 
                 # Retrieve condition from metadata
                 sub = meta[
-                    (meta["date"] == date_str) &
+                    (meta["date"] == int(date_str)) &
                     (meta["mouse_id"] == mouse_id) &
-                    (meta["run"] == run_id) &
+                    (meta["run"] == int(run_id)) &
                     (meta["well"] == well_id)
                 ]
                 condition = sub["condition"].iloc[0] if len(sub) > 0 else "unknown"
@@ -215,7 +215,9 @@ for date_dir in dates:
                     "date": date_str, "mouse_id": mouse_id,
                     "run": run_id, "well": well_id,
                     "condition": condition, **metrics,
+                    "div": int(sub["div"].iloc[0]) if len(sub) > 0 else -1,
                 }
+
                 results.append(row)
                 print(f"  {date_str}/{mouse_id}/{run_id}/{well_id}: "
                       f"FR={metrics['mean_firing_rate_hz']:.2f} Hz  "

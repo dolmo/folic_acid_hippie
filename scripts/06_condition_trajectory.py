@@ -103,7 +103,7 @@ well_unit = (
 # Load network metrics and attach condition/div from metadata
 print("Loading network metrics …")
 net_raw = pd.read_csv(NET_PATH, dtype={"date": str, "run": str})
-net_raw = net_raw.drop(columns=["condition"], errors="ignore")  # was all "unknown"
+net_raw = net_raw.drop(columns=["condition", "div"], errors="ignore")
 
 # Build (mouse_id, well) → (condition, div) lookup (constant across dates)
 wc = meta.drop_duplicates(["mouse_id", "well"])[["mouse_id", "well", "condition", "sex"]]

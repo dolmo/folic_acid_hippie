@@ -77,7 +77,7 @@ HIPPIE_RESULTS = Path(os.environ.get(
 ))
 HIPPIE_RESULTS_T3 = Path(os.environ.get(
     "HIPPIE_RESULTS_T3_DIR",
-    "/home/jesus/hippie_rebuttals/results_hippie_rebuttals/FA_T3"
+    str(PROJECT_ROOT / "datasets_hippie" / "FA_T3_results")
 ))
 
 # ── Analysis results (outputs of scripts 01–09) ──────────────────────────
@@ -91,12 +91,12 @@ RESULTS_FIGURES = RESULTS_ROOT / "figures"
 
 # ── Helper functions ──────────────────────────────────────────────────────
 
-def embedding_dir(config="full_model", z_dim=32, beta=4.0, run_suffix=""):
+def embedding_dir(config="full_architecture", z_dim=32, beta=4.0, run_suffix=""):
     """Return the HIPPIE results subdirectory for a given training config."""
-    return HIPPIE_RESULTS_T3 / f"config_{config}_zdim_{z_dim}_B_{beta}{run_suffix}"
+    return HIPPIE_RESULTS_T3 / "train_hausser_cell_type_predict_FA_T3" / f"config_{config}_zdim_{z_dim}_B_{beta}{run_suffix}"
 
 
-def embedding_file(epochs, config="full_model", z_dim=32, beta=4.0, run_suffix=""):
+def embedding_file(epochs, config="full_architecture", z_dim=32, beta=4.0, run_suffix=""):
     """Return path to parsed embedding CSV for a specific epoch count."""
     d = embedding_dir(config, z_dim, beta, run_suffix)
     ep_file = d / f"embeddings_parsed_ep{epochs}.csv"
@@ -105,6 +105,9 @@ def embedding_file(epochs, config="full_model", z_dim=32, beta=4.0, run_suffix="
     generic = d / "embeddings_parsed.csv"
     if generic.exists():
         return generic
+    predict = d / "predict_embeddings.csv"  # cross_dataset_script.py output
+    if predict.exists():
+        return predict
     return d / "pretraining_multi_embeddings.csv"  # raw fallback
 
 

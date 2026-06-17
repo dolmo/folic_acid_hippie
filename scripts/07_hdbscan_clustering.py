@@ -72,7 +72,9 @@ cond_palette = {
 
 # ─── Load embeddings + metadata ───────────────────────────────────────────────
 print(f"Loading embeddings (ep{args.epochs}) and metadata...")
-emb  = pd.read_csv(EMB_PATH).values.astype(np.float32)
+emb_df = pd.read_csv(EMB_PATH)
+latent_cols = [c for c in emb_df.columns if str(c).isdigit()]
+emb  = emb_df[latent_cols].values.astype(np.float32)
 meta = pd.read_csv(META_PATH)
 assert len(emb) == len(meta), "Embedding / metadata length mismatch"
 print(f"  Embedding matrix: {emb.shape}")
